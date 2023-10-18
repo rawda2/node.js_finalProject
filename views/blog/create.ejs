@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('../partials/head.ejs') %>
+  <body>
+    <%- include('../partials/nav.ejs') %>
+    <h2 class="title">Create a new blog</h2>
+    <div class="form">
+      <div></div>
+      <form action="/blogs/create-blog" method="POST">
+        <label for="title">Title</label><br />
+        <input type="text" id="title" name="title" /><br />
+        <span class="error" id="titleErr"></span><br />
+        <input
+          type="hidden"
+          id="createdBy"
+          name="createdBy"
+          value="<%= user._id %>"
+        />
+        <input
+          type="hidden"
+          id="creatorName"
+          name="creatorName"
+          value="<%= user.fname %> <%= user.lname %>"
+        />
+        <label for="snippet">Snippet</label><br />
+        <textarea name="snippet" id="snippet" cols="30" rows="5"></textarea
+        ><br />
+        <span class="error" id="snippetErr"></span><br />
+
+        <label for="content">Content</label><br />
+        <textarea name="content" id="content" cols="30" rows="10"></textarea
+        ><br />
+        <span class="error" id="contentErr"></span><br />
+        <label for="topic">Topic</label><br />
+        <select class="select" name="topic" id="topic">
+          <option value="food">Food</option>
+          <option value="finance">Finance</option>
+          <option value="lifestyle">Lifestyle</option>
+          <option value="tech">Technology</option></select
+        ><br />
+        <span class="error" id="topicErr"></span><br />
+        <button class="post-create-btn">Create</button>
+      </form>
+
+      <div></div>
+    </div>
+    <script>
+      const form = document.querySelector("form");
+      const titleErr = document.getElementById("titleErr");
+      const snippetErr = document.getElementById("snippetErr");
+      const contentErr = document.getElementById("contentErr");
+      const topicErr = document.getElementById("topicErr");
+
+      const btn = document.querySelector("button");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const title = document.getElementById("title").value;
+        const snippet = document.getElementById("snippet").value;
+        const content = document.getElementById("content").value;
+        const topic = document.getElementById("topic").value;
+        const creatorName = document.getElementById("creatorName").value;
+        const createdBy = document.getElementById("createdBy").value;
+
+        console.log(title, snippet, content, topic, creatorName, createdBy);
+        titleErr.textContent = "";
+        snippetErr.textContent = "";
+        contentErr.textContent = "";
+        topicErr.textContent = "";
+
+        try {
+          const res = await fetch("/blogs/create-blog", {
+            method: "POST",
+            body: JSON.stringify({
+              title,
+              snippet,
+              content,
+              topic,
+              creatorName,
+              createdBy,
+            }),
+            headers: { "Content-Type": "application/json" },
+          });
+          const data = await res.json();
+          console.log(data);
+
+          if (data.errors) {
+            titleErr.textContent = data.errors.title;
+            snippetErr.textContent = data.errors.snippet;
+            contentErr.textContent = data.errors.content;
+            topicErr.textContent = data.errors.topic;
+          }
+          if (data.blog) {
+            location.assign("/blogs");
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      });
+    </script>
+
+    <%- include('../partials/footer.ejs') %>
+  </body>
+</html>
